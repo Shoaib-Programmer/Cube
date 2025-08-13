@@ -1,28 +1,14 @@
-## Testing
-
-Unit tests are provided in `backend/solver/tests.py` and cover:
- - Cube state validation (valid/invalid cubes)
- - Facelet string conversion
- - API endpoint responses for `/solve/`, `/validate/`, and `/health/`
-
-### How to Run Tests
-
-You can run all tests using [uv](https://github.com/astral-sh/uv) for fast and reliable test execution:
-
-```bash
-uv pip install -r requirements.txt
-uv test backend/solver/
-```
-
-Or use Django's built-in test runner:
-
-```bash
-python manage.py test solver
-```
-
-Tests will automatically check cube validation, API responses, and facelet string correctness.
-
 # Rubik's Cube Solver Web Application
+
+## Table of Contents
+- [Overview](#overview)
+- [Distinctiveness and Complexity](#distinctiveness-and-complexity)
+- [File Structure and Contents](#file-structure-and-contents)
+- [Requirements](#requirements)
+- [How to Run the Application](#how-to-run-the-application)
+- [Testing](#testing)
+- [API Endpoints](#api-endpoints)
+- [Additional Information](#additional-information)
 
 ## Overview
 
@@ -75,58 +61,134 @@ This combination of algorithmic, architectural, and user experience complexity s
   - `types/`: Type definitions for cube data.
   - `public/`: Static assets (SVGs, icons).
 
+## Testing
+
+The project includes comprehensive unit tests to ensure reliability and correctness.
+
+### Test Coverage
+
+Unit tests are provided in `backend/solver/tests.py` and cover:
+- **Cube state validation** - Testing valid and invalid cube configurations
+- **Facelet string conversion** - Ensuring proper data format transformation
+- **API endpoint responses** - Testing all endpoints (`/solve/`, `/validate/`, `/health/`)
+- **Error handling** - Validating proper error responses for malformed inputs
+
+### Running Tests
+
+**Using uv (recommended):**
+```bash
+cd backend
+uv test solver/
+```
+
+**Using Django's test runner:**
+```bash
+cd backend
+python manage.py test solver
+```
+
+**Running specific test methods:**
+```bash
+python manage.py test solver.tests.TestCubeValidation
+```
+
+Tests will automatically verify cube validation logic, API response formats, and facelet string correctness. All tests should pass before deploying to production.
+
+## Requirements
+
+See `pyproject.toml` for all Python dependencies. The main requirements include:
+- **Python 3.8+**
+- **Django** - Web framework for the backend API
+- **kociemba** - Rubik's cube solving algorithm implementation
+- **pydantic** - Data validation and serialization
+- **Node.js 18+** - For the frontend development
+- **uv** - Python package manager (recommended)
+
+For a complete list of dependencies, check `pyproject.toml` (backend) and `package.json` (frontend).
+
 ## How to Run the Application
 
-### Backend
-1. **Install Python dependencies:**
+First, clone the repository:
+
+```bash
+git clone https://github.com/Shoaib-Programmer/Cube
+cd Cube
+```
+
+### Backend Setup
+
+1. **Navigate to the backend directory:**
    ```bash
-   pip install -r requirements.txt
+   cd backend
    ```
-   (Or use `pyproject.toml` with Poetry or pip.)
-2. **Apply migrations:**
+
+2. **Create and activate a virtual environment:**
    ```bash
+   uv venv                          # Create a virtual environment
+   source .venv/bin/activate        # Activate the virtual environment (Linux/Mac)
+   # or on Windows: .venv\Scripts\activate
+   ```
+
+3. **Install Python dependencies:**
+   ```bash
+   uv sync                          # Sync dependencies from lockfile
+   # or alternatively: uv pip install -r pyproject.toml
+   ```
+
+4. **Set up the database:**
+   ```bash
+   python manage.py makemigrations
    python manage.py migrate
    ```
-3. **Run the development server:**
+
+5. **Run the development server:**
    ```bash
    python manage.py runserver
    ```
    The API will be available at `http://localhost:8000/`.
 
-### Frontend
-1. **Install Node.js dependencies:**
+### Frontend Setup
+
+1. **Navigate to the frontend directory:**
    ```bash
-   npm install
-   # or
-   bun install
+   cd ../frontend
    ```
-2. **Start the frontend server:**
+
+2. **Install Node.js dependencies:**
    ```bash
-   npm run dev
-   # or
+   bun install
+   # or alternatively: npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
    bun dev
+   # or alternatively: npm run dev
    ```
    The frontend will be available at `http://localhost:3000/`.
 
-## Additional Information
-- **API Endpoints:**
-  - `/solve/`: POST a cube state to receive a solution.
-  - `/validate/`: POST a cube state to check validity.
-  - `/history/`: GET recent solve records (supports pagination).
-  - `/health/`: GET health status of the backend.
-- **Distinctive Features:**
-  - Real-time cube validation and solving.
-  - Persistent solve history with analytics.
-  - Modular, type-safe frontend for interactive cube manipulation.
-  - Advanced error handling and input validation.
-- **Python Packages:**
-  - All required packages are listed in `requirements.txt` and `pyproject.toml` (Django, kociemba, pydantic, etc.).
-- **Deployment:**
-  - The backend can be deployed on any WSGI/ASGI-compatible server.
-  - The frontend is ready for deployment on Vercel or similar platforms.
+## API Endpoints
 
-## Requirements
-See `requirements.txt` for all Python dependencies. If you add new packages, update this file accordingly.
+The backend provides the following REST API endpoints:
+
+- **`/solve/`** (POST) - Submit a cube state to receive an optimal solution
+- **`/validate/`** (POST) - Validate if a cube state is solvable
+- **`/history/`** (GET) - Retrieve recent solve records with pagination support
+- **`/health/`** (GET) - Check the health status of the backend service
+
+## Additional Information
+
+### Distinctive Features
+- Real-time cube validation and solving using Kociemba's algorithm
+- Persistent solve history with analytics and metadata tracking
+- Modular, type-safe frontend for interactive cube manipulation
+- Advanced error handling and comprehensive input validation
+- Modern UI design inspired by contemporary web applications
+
+### Deployment
+- **Backend**: Can be deployed on any WSGI/ASGI-compatible server (Gunicorn, uWSGI, etc.)
+- **Frontend**: Ready for deployment on Vercel, Netlify, or similar platforms
+- **Database**: Uses SQLite by default, easily configurable for PostgreSQL or MySQL in production
 
 ---
 

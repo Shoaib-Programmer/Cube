@@ -1,5 +1,5 @@
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client # type: ignore
 from .views import validate_cube_state, cube_array_to_facelet_string
 import json
 

@@ -1,0 +1,13 @@
+[project]
+name = "cube"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2.3",
+    "django-cors-headers>=4.7.0",
+    "django-grappelli>=4.0.2",
+    "kociemba>=1.2.1",
+    "pydantic>=2.11.7",
+]

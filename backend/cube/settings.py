@@ -21,11 +21,6 @@ STATIC_URL = "/static/"
 # Directory where collectstatic will collect static files for deployment
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Additional locations of static files during development
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 

@@ -109,7 +109,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("x", 1, -1)}
           className="px-2 py-1 bg-red-800 hover:bg-red-900 text-white text-xs rounded-lg"
         >
-          R'
+          R&apos;
         </button>
         <button
           onClick={() => rotateFace("x", -1, 1)}
@@ -121,7 +121,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("x", -1, -1)}
           className="px-2 py-1 bg-orange-800 hover:bg-orange-900 text-white text-xs rounded-lg"
         >
-          L'
+          L&apos;
         </button>
         <button
           onClick={() => rotateFace("y", 1, 1)}
@@ -133,7 +133,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("y", 1, -1)}
           className="px-2 py-1 bg-gray-200 text-black text-xs rounded-lg"
         >
-          U'
+          U&apos;
         </button>
         <button
           onClick={() => rotateFace("y", -1, 1)}
@@ -145,7 +145,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("y", -1, -1)}
           className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-black text-xs rounded-lg"
         >
-          D'
+          D&apos;
         </button>
         <button
           onClick={() => rotateFace("z", 1, 1)}
@@ -157,7 +157,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("z", 1, -1)}
           className="px-2 py-1 bg-green-800 hover:bg-green-900 text-white text-xs rounded-lg"
         >
-          F'
+          F&apos;
         </button>
         <button
           onClick={() => rotateFace("z", -1, 1)}
@@ -169,7 +169,7 @@ export default function SolverPage() {
           onClick={() => rotateFace("z", -1, -1)}
           className="px-2 py-1 bg-blue-800 hover:bg-blue-900 text-white text-xs rounded-lg"
         >
-          B'
+          B&apos;
         </button>
       </div>
       <p className="text-xs font-semibold mb-2 text-gray-300">Cube Rotation</p>

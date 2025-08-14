@@ -4,7 +4,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { PerspectiveCamera, useDepthBuffer } from "@react-three/drei";
 import * as THREE from "three";
-import { RubiksCubeModel } from "@/components/rubik-s-cube/rubik-s-cube";
+import { SimpleRubiksCube } from "@/components/rubik-s-cube/simple-rubik-s-cube";
 import { EnhancedSpotlight } from "@/components/ui/EnhancedSpotlight";
 
 function CameraController() {
@@ -48,7 +48,7 @@ function SceneContent() {
       <CameraController />
 
       <Suspense fallback={null}>
-        <RubiksCubeModel position={[0, 0, 0]} scale={1} />
+        <SimpleRubiksCube position={[0, 0, 0]} scale={1} />
       </Suspense>
     </>
   );

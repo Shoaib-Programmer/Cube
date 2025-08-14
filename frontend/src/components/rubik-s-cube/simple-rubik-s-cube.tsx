@@ -6,6 +6,7 @@ import React, {
   useEffect,
   forwardRef,
   useCallback,
+  useMemo,
 } from "react";
 import * as THREE from "three";
 import {
@@ -75,7 +76,7 @@ export const SimpleRubiksCube = forwardRef<
   };
 
   // Color to number mapping for API
-  const colorToNumber: Record<CubeColor, number> = {
+  const colorToNumber: Record<CubeColor, number> = useMemo(() => ({
     white: 0, // Up face
     red: 1, // Right face
     green: 2, // Front face
@@ -83,7 +84,7 @@ export const SimpleRubiksCube = forwardRef<
     orange: 4, // Left face
     blue: 5, // Back face
     black: -1, // Not a face color (internal cubes)
-  };
+  }), []);
 
   // Helper: compute cube state from current cube transforms and sticker colors
   const computeCubeStateFromCubes = useCallback(
@@ -180,7 +181,7 @@ export const SimpleRubiksCube = forwardRef<
 
       return faces;
     },
-    [],
+    [colorToNumber],
   );
 
   // Initialize 3x3x3 cube with standard colors
@@ -228,317 +229,7 @@ export const SimpleRubiksCube = forwardRef<
     [selectedColor],
   );
 
-  // Helper functions to apply specific face rotations to cube state
-  const rotateFaceMatrix = (face: number[][], clockwise: boolean) => {
-    const n = face.length;
-    const rotated = Array(n)
-      .fill(null)
-      .map(() => Array(n).fill(0));
-
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        if (clockwise) {
-          rotated[j][n - 1 - i] = face[i][j];
-        } else {
-          rotated[n - 1 - j][i] = face[i][j];
-        }
-      }
-    }
-
-    return rotated;
-  };
-
-  const applyRightFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Face indices: [Up=0, Right=1, Front=2, Down=3, Left=4, Back=5]
-
-    // Rotate the right face itself
-    state[1] = rotateFaceMatrix(state[1], direction === 1);
-
-    // Handle adjacent edges
-    if (direction === 1) {
-      // R (clockwise)
-      // Save the right column of Up face
-      const temp = [state[0][0][2], state[0][1][2], state[0][2][2]];
-
-      // Up -> Back (note: back face is viewed from behind, so columns are reversed)
-      state[0][0][2] = state[2][0][2]; // Front -> Up
-      state[0][1][2] = state[2][1][2];
-      state[0][2][2] = state[2][2][2];
-
-      // Front -> Down
-      state[2][0][2] = state[3][0][2];
-      state[2][1][2] = state[3][1][2];
-      state[2][2][2] = state[3][2][2];
-
-      // Down -> Back (reversed)
-      state[3][0][2] = state[5][2][0];
-      state[3][1][2] = state[5][1][0];
-      state[3][2][2] = state[5][0][0];
-
-      // Back -> Up (reversed)
-      state[5][2][0] = temp[0];
-      state[5][1][0] = temp[1];
-      state[5][0][0] = temp[2];
-    } else {
-      // R' (counter-clockwise)
-      // Save the right column of Up face
-      const temp = [state[0][0][2], state[0][1][2], state[0][2][2]];
-
-      // Up -> Back (reversed)
-      state[0][0][2] = state[5][2][0];
-      state[0][1][2] = state[5][1][0];
-      state[0][2][2] = state[5][0][0];
-
-      // Back -> Down (reversed)
-      state[5][2][0] = state[3][0][2];
-      state[5][1][0] = state[3][1][2];
-      state[5][0][0] = state[3][2][2];
-
-      // Down -> Front
-      state[3][0][2] = state[2][0][2];
-      state[3][1][2] = state[2][1][2];
-      state[3][2][2] = state[2][2][2];
-
-      // Front -> Up
-      state[2][0][2] = temp[0];
-      state[2][1][2] = temp[1];
-      state[2][2][2] = temp[2];
-    }
-  };
-
-  const applyLeftFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Rotate the left face itself
-    state[4] = rotateFaceMatrix(state[4], direction === 1);
-
-    // Handle adjacent edges (opposite of right)
-    if (direction === 1) {
-      // L (clockwise)
-      const temp = [state[0][0][0], state[0][1][0], state[0][2][0]];
-
-      // Up -> Front
-      state[0][0][0] = state[5][2][2];
-      state[0][1][0] = state[5][1][2];
-      state[0][2][0] = state[5][0][2];
-
-      // Front -> Down
-      state[5][2][2] = state[3][0][0];
-      state[5][1][2] = state[3][1][0];
-      state[5][0][2] = state[3][2][0];
-
-      // Down -> Back
-      state[3][0][0] = state[2][0][0];
-      state[3][1][0] = state[2][1][0];
-      state[3][2][0] = state[2][2][0];
-
-      // Back -> Up
-      state[2][0][0] = temp[0];
-      state[2][1][0] = temp[1];
-      state[2][2][0] = temp[2];
-    } else {
-      // L'
-      const temp = [state[0][0][0], state[0][1][0], state[0][2][0]];
-
-      state[0][0][0] = state[2][0][0];
-      state[0][1][0] = state[2][1][0];
-      state[0][2][0] = state[2][2][0];
-
-      state[2][0][0] = state[3][0][0];
-      state[2][1][0] = state[3][1][0];
-      state[2][2][0] = state[3][2][0];
-
-      state[3][0][0] = state[5][2][2];
-      state[3][1][0] = state[5][1][2];
-      state[3][2][0] = state[5][0][2];
-
-      state[5][2][2] = temp[0];
-      state[5][1][2] = temp[1];
-      state[5][0][2] = temp[2];
-    }
-  };
-
-  const applyUpFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Rotate the up face itself
-    state[0] = rotateFaceMatrix(state[0], direction === 1);
-
-    if (direction === 1) {
-      // U (clockwise)
-      const temp = [state[2][0][0], state[2][0][1], state[2][0][2]];
-
-      // Front -> Left
-      state[2][0][0] = state[1][0][0];
-      state[2][0][1] = state[1][0][1];
-      state[2][0][2] = state[1][0][2];
-
-      // Right -> Front
-      state[1][0][0] = state[5][0][0];
-      state[1][0][1] = state[5][0][1];
-      state[1][0][2] = state[5][0][2];
-
-      // Back -> Right
-      state[5][0][0] = state[4][0][0];
-      state[5][0][1] = state[4][0][1];
-      state[5][0][2] = state[4][0][2];
-
-      // Left -> Back
-      state[4][0][0] = temp[0];
-      state[4][0][1] = temp[1];
-      state[4][0][2] = temp[2];
-    } else {
-      // U'
-      const temp = [state[2][0][0], state[2][0][1], state[2][0][2]];
-
-      state[2][0][0] = state[4][0][0];
-      state[2][0][1] = state[4][0][1];
-      state[2][0][2] = state[4][0][2];
-
-      state[4][0][0] = state[5][0][0];
-      state[4][0][1] = state[5][0][1];
-      state[4][0][2] = state[5][0][2];
-
-      state[5][0][0] = state[1][0][0];
-      state[5][0][1] = state[1][0][1];
-      state[5][0][2] = state[1][0][2];
-
-      state[1][0][0] = temp[0];
-      state[1][0][1] = temp[1];
-      state[1][0][2] = temp[2];
-    }
-  };
-
-  const applyDownFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Rotate the down face itself
-    state[3] = rotateFaceMatrix(state[3], direction === 1);
-
-    if (direction === 1) {
-      // D (clockwise)
-      const temp = [state[2][2][0], state[2][2][1], state[2][2][2]];
-
-      state[2][2][0] = state[4][2][0];
-      state[2][2][1] = state[4][2][1];
-      state[2][2][2] = state[4][2][2];
-
-      state[4][2][0] = state[5][2][0];
-      state[4][2][1] = state[5][2][1];
-      state[4][2][2] = state[5][2][2];
-
-      state[5][2][0] = state[1][2][0];
-      state[5][2][1] = state[1][2][1];
-      state[5][2][2] = state[1][2][2];
-
-      state[1][2][0] = temp[0];
-      state[1][2][1] = temp[1];
-      state[1][2][2] = temp[2];
-    } else {
-      // D'
-      const temp = [state[2][2][0], state[2][2][1], state[2][2][2]];
-
-      state[2][2][0] = state[1][2][0];
-      state[2][2][1] = state[1][2][1];
-      state[2][2][2] = state[1][2][2];
-
-      state[1][2][0] = state[5][2][0];
-      state[1][2][1] = state[5][2][1];
-      state[1][2][2] = state[5][2][2];
-
-      state[5][2][0] = state[4][2][0];
-      state[5][2][1] = state[4][2][1];
-      state[5][2][2] = state[4][2][2];
-
-      state[4][2][0] = temp[0];
-      state[4][2][1] = temp[1];
-      state[4][2][2] = temp[2];
-    }
-  };
-
-  const applyFrontFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Rotate the front face itself
-    state[2] = rotateFaceMatrix(state[2], direction === 1);
-
-    if (direction === 1) {
-      // F (clockwise)
-      const temp = [state[0][2][0], state[0][2][1], state[0][2][2]];
-
-      state[0][2][0] = state[4][2][2];
-      state[0][2][1] = state[4][1][2];
-      state[0][2][2] = state[4][0][2];
-
-      state[4][2][2] = state[3][0][2];
-      state[4][1][2] = state[3][0][1];
-      state[4][0][2] = state[3][0][0];
-
-      state[3][0][2] = state[1][2][0];
-      state[3][0][1] = state[1][1][0];
-      state[3][0][0] = state[1][0][0];
-
-      state[1][2][0] = temp[0];
-      state[1][1][0] = temp[1];
-      state[1][0][0] = temp[2];
-    } else {
-      // F'
-      const temp = [state[0][2][0], state[0][2][1], state[0][2][2]];
-
-      state[0][2][0] = state[1][2][0];
-      state[0][2][1] = state[1][1][0];
-      state[0][2][2] = state[1][0][0];
-
-      state[1][2][0] = state[3][0][2];
-      state[1][1][0] = state[3][0][1];
-      state[1][0][0] = state[3][0][0];
-
-      state[3][0][2] = state[4][2][2];
-      state[3][0][1] = state[4][1][2];
-      state[3][0][0] = state[4][0][2];
-
-      state[4][2][2] = temp[0];
-      state[4][1][2] = temp[1];
-      state[4][0][2] = temp[2];
-    }
-  };
-
-  const applyBackFaceRotation = (state: number[][][], direction: 1 | -1) => {
-    // Rotate the back face itself
-    state[5] = rotateFaceMatrix(state[5], direction === 1);
-
-    if (direction === 1) {
-      // B (clockwise)
-      const temp = [state[0][0][0], state[0][0][1], state[0][0][2]];
-
-      state[0][0][0] = state[1][0][2];
-      state[0][0][1] = state[1][1][2];
-      state[0][0][2] = state[1][2][2];
-
-      state[1][0][2] = state[3][2][2];
-      state[1][1][2] = state[3][2][1];
-      state[1][2][2] = state[3][2][0];
-
-      state[3][2][2] = state[4][2][0];
-      state[3][2][1] = state[4][1][0];
-      state[3][2][0] = state[4][0][0];
-
-      state[4][2][0] = temp[0];
-      state[4][1][0] = temp[1];
-      state[4][0][0] = temp[2];
-    } else {
-      // B'
-      const temp = [state[0][0][0], state[0][0][1], state[0][0][2]];
-
-      state[0][0][0] = state[4][2][0];
-      state[0][0][1] = state[4][1][0];
-      state[0][0][2] = state[4][0][0];
-
-      state[4][2][0] = state[3][2][2];
-      state[4][1][0] = state[3][2][1];
-      state[4][0][0] = state[3][2][0];
-
-      state[3][2][2] = state[1][0][2];
-      state[3][2][1] = state[1][1][2];
-      state[3][2][0] = state[1][2][2];
-
-      state[1][0][2] = temp[0];
-      state[1][1][2] = temp[1];
-      state[1][2][2] = temp[2];
-    }
-  };
+  // Helper: get cubes in a specific layer
   const getCubesInLayer = useCallback(
     (axis: Axis, layer: number): CubeState[] => {
       return cubes.filter((cube) => {

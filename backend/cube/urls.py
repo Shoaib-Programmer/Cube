@@ -20,7 +20,7 @@ from django.urls import path, include
 from solver import views
 
 urlpatterns = [
-    path('grappelli/', include('grappelli.urls')),  # grappelli URLS
+    path("grappelli/", include("grappelli.urls")),  # grappelli URLS
     path("admin/", admin.site.urls),
     path("solve/", views.SolveCubeView.as_view(), name="solve_cube"),
     path("validate/", views.ValidateCubeView.as_view(), name="validate_cube"),

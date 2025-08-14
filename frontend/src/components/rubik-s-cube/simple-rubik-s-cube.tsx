@@ -76,15 +76,18 @@ export const SimpleRubiksCube = forwardRef<
   };
 
   // Color to number mapping for API
-  const colorToNumber: Record<CubeColor, number> = useMemo(() => ({
-    white: 0, // Up face
-    red: 1, // Right face
-    green: 2, // Front face
-    yellow: 3, // Down face
-    orange: 4, // Left face
-    blue: 5, // Back face
-    black: -1, // Not a face color (internal cubes)
-  }), []);
+  const colorToNumber: Record<CubeColor, number> = useMemo(
+    () => ({
+      white: 0, // Up face
+      red: 1, // Right face
+      green: 2, // Front face
+      yellow: 3, // Down face
+      orange: 4, // Left face
+      blue: 5, // Back face
+      black: -1, // Not a face color (internal cubes)
+    }),
+    [],
+  );
 
   // Helper: compute cube state from current cube transforms and sticker colors
   const computeCubeStateFromCubes = useCallback(

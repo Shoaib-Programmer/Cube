@@ -48,7 +48,6 @@ class CubeRequestBody(BaseModel):
         return v
 
 
-
 def cube_array_to_facelet_string(cube_array: List[List[List[int]]]) -> str:
     """
     Convert 3D cube array to kociemba facelet string format.
@@ -90,7 +89,7 @@ def validate_cube_state(cube_array: List[List[List[int]]]) -> Tuple[bool, str]:
     - Check dimensions (6 faces, each 3x3)
     - Check color counts (9 of each color)
     - Check center squares for consistency
-    
+
     Note: This function only does basic validation. The kociemba algorithm
     will perform additional validation to ensure the cube state is physically
     solvable. A cube can pass this validation but still be rejected by kociemba
@@ -122,9 +121,12 @@ def validate_cube_state(cube_array: List[List[List[int]]]) -> Tuple[bool, str]:
     for i, face in enumerate(cube_array):
         center_color = face[1][1]  # Center is at [1][1]
         center_colors.append(center_color)
-    
+
     if len(set(center_colors)) != 6:
-        return False, f"Center squares must be unique colors. Found centers: {center_colors}"
+        return (
+            False,
+            f"Center squares must be unique colors. Found centers: {center_colors}",
+        )
 
     return True, "Valid"
 
@@ -153,22 +155,22 @@ class SolveCubeView(View):
         "status": "success"
     }
     """
-    
+
     def _get_client_ip(self, request: HttpRequest) -> str:
         """Get client IP address from request."""
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
+            ip = x_forwarded_for.split(",")[0]
         else:
-            ip = request.META.get('REMOTE_ADDR')
-        return ip or 'unknown'
+            ip = request.META.get("REMOTE_ADDR")
+        return ip or "unknown"
 
     def post(self, request: HttpRequest) -> JsonResponse:
         try:
             # Add debug logging
             print(f"Received request body: {request.body}")
             print(f"Request content type: {request.content_type}")
-            
+
             try:
                 data = json.loads(request.body)
                 print(f"Parsed JSON data: {data}")
@@ -228,11 +230,11 @@ class SolveCubeView(View):
                         solution="",  # Empty string for already solved
                         move_count=0,
                         solve_time_ms=0.0,
-                        ip_address=client_ip
+                        ip_address=client_ip,
                     )
                 except Exception as db_error:
                     print(f"Failed to save solve record: {db_error}")
-                
+
                 return JsonResponse(
                     {
                         "solution": [],
@@ -264,13 +266,13 @@ class SolveCubeView(View):
                 try:
                     # Get client IP address
                     client_ip = self._get_client_ip(request)
-                    
+
                     CubeSolve.objects.create(
                         facelet_string=facelet_string,
                         solution=solution_string,
                         move_count=len(moves),
                         solve_time_ms=solve_time_ms,
-                        ip_address=client_ip
+                        ip_address=client_ip,
                     )
                 except Exception as db_error:
                     # Log the error but don't fail the request
@@ -296,7 +298,7 @@ class SolveCubeView(View):
                         "error": "Invalid cube configuration - this cube state is not physically solvable",
                         "details": str(ve),
                         "facelet_string": facelet_string,
-                        "status": "error"
+                        "status": "error",
                     },
                     status=400,
                 )
@@ -304,6 +306,7 @@ class SolveCubeView(View):
             except Exception as e:
                 print(f"Solver exception: {e}")
                 import traceback
+
                 traceback.print_exc()
                 return JsonResponse(
                     {"error": f"Solver error: {str(e)}", "status": "error"}, status=500
@@ -316,6 +319,7 @@ class SolveCubeView(View):
         except Exception as e:
             print(f"Unexpected server error in SolveCubeView: {e}")
             import traceback
+
             traceback.print_exc()
             return JsonResponse(
                 {"error": f"Server error: {str(e)}", "status": "error"}, status=500
@@ -393,48 +397,51 @@ def solve_history(request: HttpRequest) -> JsonResponse:
     """Get recent solve history."""
     try:
         # Get query parameters for pagination
-        limit = int(request.GET.get('limit', 50))  # Default to 50 records
-        offset = int(request.GET.get('offset', 0))  # Default to no offset
-        
+        limit = int(request.GET.get("limit", 50))  # Default to 50 records
+        offset = int(request.GET.get("offset", 0))  # Default to no offset
+
         # Limit the maximum number of records that can be retrieved at once
         limit = min(limit, 100)
-        
+
         # Query the database
-        solves = CubeSolve.objects.all()[offset:offset+limit]
-        
+        solves = CubeSolve.objects.all()[offset : offset + limit]
+
         # Convert to JSON-serializable format
         solve_data = []
         for solve in solves:
-            solve_data.append({
-                'id': solve.id, # type: ignore
-                'facelet_string': solve.facelet_string,
-                'solution': solve.solution.split() if solve.solution else [],
-                'move_count': solve.move_count,
-                'solve_time_ms': solve.solve_time_ms,
-                'timestamp': solve.timestamp.isoformat(),
-                'ip_address': solve.ip_address
-            })
-        
+            solve_data.append(
+                {
+                    "id": solve.id,  # type: ignore
+                    "facelet_string": solve.facelet_string,
+                    "solution": solve.solution.split() if solve.solution else [],
+                    "move_count": solve.move_count,
+                    "solve_time_ms": solve.solve_time_ms,
+                    "timestamp": solve.timestamp.isoformat(),
+                    "ip_address": solve.ip_address,
+                }
+            )
+
         # Get total count for pagination
         total_count = CubeSolve.objects.count()
-        
-        return JsonResponse({
-            'solves': solve_data,
-            'total_count': total_count,
-            'limit': limit,
-            'offset': offset,
-            'status': 'success'
-        })
-        
+
+        return JsonResponse(
+            {
+                "solves": solve_data,
+                "total_count": total_count,
+                "limit": limit,
+                "offset": offset,
+                "status": "success",
+            }
+        )
+
     except ValueError:
         return JsonResponse(
-            {"error": "Invalid limit or offset parameter", "status": "error"}, 
-            status=400
+            {"error": "Invalid limit or offset parameter", "status": "error"},
+            status=400,
         )
     except Exception as e:
         return JsonResponse(
-            {"error": f"Server error: {str(e)}", "status": "error"}, 
-            status=500
+            {"error": f"Server error: {str(e)}", "status": "error"}, status=500
         )
 
 
@@ -498,21 +505,21 @@ def solve_cube_fbv(request: HttpRequest) -> JsonResponse:
             try:
                 # Get client IP address
                 def get_client_ip(request: HttpRequest) -> str:
-                    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
                     if x_forwarded_for:
-                        ip = x_forwarded_for.split(',')[0]
+                        ip = x_forwarded_for.split(",")[0]
                     else:
-                        ip = request.META.get('REMOTE_ADDR')
-                    return ip or 'unknown'
-                
+                        ip = request.META.get("REMOTE_ADDR")
+                    return ip or "unknown"
+
                 client_ip = get_client_ip(request)
-                
+
                 CubeSolve.objects.create(
                     facelet_string=facelet_string,
                     solution=solution_string,
                     move_count=len(moves),
                     solve_time_ms=solve_time_ms,
-                    ip_address=client_ip
+                    ip_address=client_ip,
                 )
             except Exception as db_error:
                 # Log the error but don't fail the request
